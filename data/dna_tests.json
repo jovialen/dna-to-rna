@@ -1,0 +1,24 @@
+[
+    {
+        "dna": "aattggcct",
+        "rna": "UUAACCGGA",
+        "triplets": [
+            "UUA",
+            "ACC",
+            "GGA"
+        ],
+        "remainder": ""
+    },
+    {
+        "dna": "AATTGGCCTT",
+        "rna": "UUAACCGGAA",
+        "triplets": [
+            "UUA",
+            "ACC",
+            "GGA"
+        ],
+        "remainder": "A"
+    }
+
+    
+]
