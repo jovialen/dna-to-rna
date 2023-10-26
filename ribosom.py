@@ -118,24 +118,39 @@ def amino_acid_to_proteins(amino_acids: list[str]) -> list[str]:
     
     return filter(lambda protein: protein != "", "".join(amino_acids).split(STOP_AMINO))
 
+# MUTATION
+
+def mutate_rna(rna: str) -> str:
+    """Mutate a RNA string
+
+    Args:
+        rna (str): The RNA to mutate
+
+    Returns:
+        str: The mutated RNA string
+    """
+
+    mutation = random.randint(0, 2)
+    at = random.randint(0, len(rna))
+    base = random.choice(list(COMPLIMENTS.values()))
+    
+    if mutation == 0:
+        print("Replacing base")
+        return rna[:at] + base + rna[at + 1:]
+    elif mutation == 1:
+        print("Inserting base")
+        return rna[:at] + base + rna[at:]
+    else:
+        print("Removing base")
+        return rna[:at] + rna[at + 1:]
+
 # MAIN
 
 def dna_to_proteins(dna: str, mutate: bool = False) -> (list[str], str):
     rna = dna_to_rna(dna)
     
     if mutate:
-        base = random.choice(list(COMPLIMENTS.values()))
-        at = random.randint(0, len(rna))
-        mutation = random.randint(0, 2)
-        if mutation == 0:
-            print("Replacing base")
-            rna = rna[:at] + base + rna[at + 1:]
-        elif mutation == 1:
-            print("Inserting base")
-            rna = rna[:at] + base + rna[at:]
-        else:
-            print("Removing base")
-            rna = rna[:at] + rna[at + 1:]
+        rna = mutate_rna(rna)
 
     (triplets, remainder) = sequence_to_triplets(rna)
     amino_acids = triplets_to_amino_acids(triplets)
@@ -147,6 +162,9 @@ def main(args):
     dna = read_text(args.path)
     (proteins, remainder) = dna_to_proteins(dna)
     proteins = "\n  ".join(proteins)
+
+    print("Proteins:\n ", proteins)
+    print(f"Remainder: {remainder}")
     
     if args.mutate:
         (mutated_protein, mutated_remainder) = dna_to_proteins(dna, mutate=True)
@@ -156,10 +174,7 @@ def main(args):
 
         print("Mutated proteins:\n ", mutated_protein)
         print(f"Mutated remainder: {mutated_remainder}")
-        print(f"Different amino acids from original: {count} ({count / len(proteins) * 100:.1f}%)")
-
-    print("Proteins:\n ", proteins)
-    print(f"Remainder: {remainder}")
+        print(f"Different amino acids from original: {count} ({count / len(proteins) * 100:,.1f}%)")
 
 
 if __name__ == "__main__":
