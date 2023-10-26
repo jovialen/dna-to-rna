@@ -50,6 +50,7 @@ def dna_to_rna(dna: str) -> str:
         base = dna_base_to_rna_compliment(char)
         if base == None:
             print(f"FAILED: {char} is not a dna base")
+            continue
         rna += base
     return rna
 
@@ -69,7 +70,8 @@ def sequence_to_triplets(sequence: str) -> tuple[list[str], str]:
     triplets = []
     for i in range(count):
         triplets.append(sequence[3 * i:3 * i + 3])
-    return (triplets, sequence[count*3:])
+    remainder = sequence[count * 3:]
+    return (triplets, remainder)
 
 # TRIPLETS TO AMINO ACIDS
 
@@ -101,31 +103,17 @@ def triplets_to_amino_acids(triplets: list[str]):
 
 # AMINO ACIDS TO PROTEINS
 
-def amino_acid_to_proteins(amino_acids: list[str]) -> list[list[str]]:
+def amino_acid_to_proteins(amino_acids: list[str]) -> list[str]:
     """Convert amino acids to proteins
 
     Args:
         amino_acids (list[str]): List of the amino acids
 
     Returns:
-        list[list[str]]: List of the proteins produced
+        list[str]: List of the proteins produced
     """
     
-    proteins = []
-    build_protein = ""
-
-    for amino in amino_acids:
-        if amino == STOP_AMINO:
-            if build_protein != "":
-                proteins.append(build_protein)
-                build_protein = ""
-        else:
-            build_protein += amino
-
-    if build_protein != "":
-        proteins.append(build_protein)
-
-    return proteins
+    return filter(lambda protein: protein != "", "".join(amino_acids).split(STOP_AMINO))
 
 # MAIN
 
