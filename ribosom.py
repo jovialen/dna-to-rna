@@ -1,4 +1,6 @@
-import argparse, csv
+import argparse
+import csv
+import random
 
 
 def read_text(path: str) -> str:
@@ -16,6 +18,13 @@ def read_text(path: str) -> str:
 
 # DNA TO RNA
 
+COMPLIMENTS = {
+    "A": "U",
+    "T": "A",
+    "G": "C",
+    "C": "G",
+}
+
 def dna_base_to_rna_compliment(base: str) -> str:
     """Convert a DNA base to the matching RNA base
 
@@ -26,13 +35,7 @@ def dna_base_to_rna_compliment(base: str) -> str:
         str: The complimentary RNA base, or None if `base` is invalid
     """
     
-    compliments = {
-        "A": "U",
-        "T": "A",
-        "G": "C",
-        "C": "G",
-    }
-    return compliments.get(base.upper())
+    return COMPLIMENTS.get(base.upper())
 
 
 def dna_to_rna(dna: str) -> str:
@@ -117,27 +120,52 @@ def amino_acid_to_proteins(amino_acids: list[str]) -> list[str]:
 
 # MAIN
 
-def main(args):
-    dna = read_text(args.path)
+def dna_to_proteins(dna: str, mutate: bool = False) -> (list[str], str):
     rna = dna_to_rna(dna)
+    
+    if mutate:
+        base = random.choice(list(COMPLIMENTS.values()))
+        at = random.randint(0, len(rna))
+        mutation = random.randint(0, 2)
+        if mutation == 0:
+            print("Replacing base")
+            rna = rna[:at] + base + rna[at + 1:]
+        elif mutation == 1:
+            print("Inserting base")
+            rna = rna[:at] + base + rna[at:]
+        else:
+            print("Removing base")
+            rna = rna[:at] + rna[at + 1:]
+
     (triplets, remainder) = sequence_to_triplets(rna)
     amino_acids = triplets_to_amino_acids(triplets)
     proteins = amino_acid_to_proteins(amino_acids)
+    return (proteins, remainder)
+
+
+def main(args):
+    dna = read_text(args.path)
+    (proteins, remainder) = dna_to_proteins(dna)
+    proteins = "\n  ".join(proteins)
     
-    if args.out:
-        with open(args.out, "w") as f:
-            f.write("Proteins:\n  ")
-            f.write("\n  ".join(proteins))
-            f.write(f"\nRemainder: {remainder}")
-    else:
-        print("Proteins:\n ", "\n  ".join(proteins))
-        print(f"Remainder: {remainder}")
+    if args.mutate:
+        (mutated_protein, mutated_remainder) = dna_to_proteins(dna, mutate=True)
+        mutated_protein = "\n  ".join(mutated_protein)
+        
+        count = sum(1 for a, b in zip(proteins, mutated_protein) if a != b)
+
+        print("Mutated proteins:\n ", mutated_protein)
+        print(f"Mutated remainder: {mutated_remainder}")
+        print(f"Different amino acids from original: {count} ({count / len(proteins) * 100:.1f}%)")
+
+    print("Proteins:\n ", proteins)
+    print(f"Remainder: {remainder}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Ribosom", description="Convert a DNA sequence to the proteins they code")
     parser.add_argument("path", type=str)
-    parser.add_argument("--out", type=str)
+    parser.add_argument("--mutate", action='store_true')
     args = parser.parse_args()
-    
+
     main(args)
