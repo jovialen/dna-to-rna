@@ -12,11 +12,12 @@ def read_text(path: str) -> str:
     Returns:
         str: The contents of the file
     """
-    
+
     with open(path, "r") as f:
         return f.read().replace("\n", "")
 
 # DNA TO RNA
+
 
 COMPLIMENTS = {
     "A": "U",
@@ -24,6 +25,7 @@ COMPLIMENTS = {
     "G": "C",
     "C": "G",
 }
+
 
 def dna_base_to_rna_compliment(base: str) -> str:
     """Convert a DNA base to the matching RNA base
@@ -34,7 +36,7 @@ def dna_base_to_rna_compliment(base: str) -> str:
     Returns:
         str: The complimentary RNA base, or None if `base` is invalid
     """
-    
+
     return COMPLIMENTS.get(base.upper())
 
 
@@ -47,17 +49,18 @@ def dna_to_rna(dna: str) -> str:
     Returns:
         str: The complimentary RNA string
     """
-    
+
     rna = ""
     for char in dna:
         base = dna_base_to_rna_compliment(char)
-        if base == None:
+        if base is None:
             print(f"FAILED: {char} is not a dna base")
             continue
         rna += base
     return rna
 
 # SPLIT INTO TRIPLETS
+
 
 def sequence_to_triplets(sequence: str) -> tuple[list[str], str]:
     """Split a DNA/RNA sequence into triplets
@@ -66,9 +69,10 @@ def sequence_to_triplets(sequence: str) -> tuple[list[str], str]:
         sequence (str): The sequence to split
 
     Returns:
-        tuple[list[str], str]: List of the triplets of the sequence and the remainder of the sequence
+        tuple[list[str], str]: List of the triplets of the sequence and the
+                               remainder of the sequence
     """
-    
+
     count = len(sequence) // 3
     triplets = []
     for i in range(count):
@@ -77,6 +81,7 @@ def sequence_to_triplets(sequence: str) -> tuple[list[str], str]:
     return (triplets, remainder)
 
 # TRIPLETS TO AMINO ACIDS
+
 
 def load_mapping(filename):
     mapping = {}
@@ -106,6 +111,7 @@ def triplets_to_amino_acids(triplets: list[str]):
 
 # AMINO ACIDS TO PROTEINS
 
+
 def amino_acid_to_proteins(amino_acids: list[str]) -> list[str]:
     """Convert amino acids to proteins
 
@@ -115,10 +121,12 @@ def amino_acid_to_proteins(amino_acids: list[str]) -> list[str]:
     Returns:
         list[str]: List of the proteins produced
     """
-    
-    return filter(lambda protein: protein != "", "".join(amino_acids).split(STOP_AMINO))
+
+    return filter(lambda protein: protein != "", "".join(amino_acids)
+                                                   .split(STOP_AMINO))
 
 # MUTATION
+
 
 def mutate_rna(rna: str) -> str:
     """Mutate a RNA string
@@ -133,7 +141,7 @@ def mutate_rna(rna: str) -> str:
     mutation = random.randint(0, 2)
     at = random.randint(0, len(rna))
     base = random.choice(list(COMPLIMENTS.values()))
-    
+
     if mutation == 0:
         print("Replacing base")
         return rna[:at] + base + rna[at + 1:]
@@ -146,9 +154,10 @@ def mutate_rna(rna: str) -> str:
 
 # MAIN
 
+
 def dna_to_proteins(dna: str, mutate: bool = False) -> (list[str], str):
     rna = dna_to_rna(dna)
-    
+
     if mutate:
         rna = mutate_rna(rna)
 
@@ -165,20 +174,22 @@ def main(args):
 
     print("Proteins:\n ", proteins)
     print(f"Remainder: {remainder}")
-    
+
     if args.mutate:
-        (mutated_protein, mutated_remainder) = dna_to_proteins(dna, mutate=True)
+        (mutated_protein, mutated_remainder) = dna_to_proteins(dna, True)
         mutated_protein = "\n  ".join(mutated_protein)
-        
+
         count = sum(1 for a, b in zip(proteins, mutated_protein) if a != b)
+        percent = count / len(proteins) * 100
 
         print("Mutated proteins:\n ", mutated_protein)
         print(f"Mutated remainder: {mutated_remainder}")
-        print(f"Different amino acids from original: {count} ({count / len(proteins) * 100:,.1f}%)")
+        print(f"Different amino acids from original: {count} ({percent:.1f}%)")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Ribosom", description="Convert a DNA sequence to the proteins they code")
+    desc = "Convert a DNA sequence to the proteins they code"
+    parser = argparse.ArgumentParser("Ribosom", description=desc)
     parser.add_argument("path", type=str)
     parser.add_argument("--mutate", action='store_true')
     args = parser.parse_args()
